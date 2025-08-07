@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 1696561956945792755}
   - component: {fileID: 8746720016662250980}
   - component: {fileID: 1874890117756101253}
+  - component: {fileID: 2086622349093642536}
   m_Layer: 0
   m_Name: TodoCategoryItem
   m_TagString: Untagged
@@ -200,3 +201,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2086622349093642536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682826819900801973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a3becd10a5293d43bbc8fbc903f6267, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category:
+    Id: 0
+    Name: 
+    CategoryItem: {fileID: 0}
+    CategoryScrollBar: {fileID: 0}
+    Todos: []
