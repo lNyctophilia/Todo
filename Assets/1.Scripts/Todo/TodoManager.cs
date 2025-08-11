@@ -122,6 +122,12 @@ public class TodoManager : MonoBehaviour
     }
     public void DeleteTodo(Todo todo)
     {
+        var categoryIndex = GetCategoryIndex(activeCategoryId);
+        if (categoryIndex >= 0)
+        {
+            todoCategories[categoryIndex].Todos.Remove(todo);
+        }
+
         Destroy(todo.Item);
     }
     private void MoveTodo(Todo todo, GameObject target)
@@ -238,12 +244,12 @@ public class TodoManager : MonoBehaviour
     {
         if (pause)
         {
-            TodoSaveManager.Instance.Save(todoCategories);
+            TodoSaveManager.Instance?.Save(todoCategories);
         }
     }
     private void OnApplicationQuit()
     {
-        TodoSaveManager.Instance.Save(todoCategories);
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
     public void LoadTodos()
     {
