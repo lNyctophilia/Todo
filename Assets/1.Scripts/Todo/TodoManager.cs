@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using System.IO;
 
 public class TodoManager : MonoBehaviour
 {
@@ -11,115 +10,72 @@ public class TodoManager : MonoBehaviour
     [SerializeField] private GameObject CategoryScrollBarPrefab;
     [SerializeField] private Transform CategoryParent;
     [SerializeField] private Transform CategoryScrollBarParent;
-
+    [SerializeField] private InputField CategoryInputField;
 
     [Header("Todo References")]
     [SerializeField] private GameObject TodoContentPrefab;
     [SerializeField] private InputField TodoInputField;
-    [SerializeField] private Toggle TodoToggle;
-
-    [Space(10)]
-
-    [SerializeField] private GameObject TodoTextGameObject;
-    [SerializeField] private GameObject TodoNowTextGameObject;
-    [SerializeField] private GameObject DoneTextGameObject;
 
     [Header("Data")]
     private List<Category> todoCategories = new List<Category>();
-
-    [Header("Settings")]
-    [SerializeField] private TodoProcess currentProcess = TodoProcess.Add;
     [SerializeField] private int activeCategoryId;
 
     public static TodoManager Instance;
+
     private void Awake()
     {
         Instance = this;
 
-        TodoInputField.text = "Default";
+        // Varsayılan kategori
+        CategoryInputField.text = "Default";
         AddCategory();
-        TodoInputField.text = null;
+        CategoryInputField.text = null;
     }
+
     private void Start()
     {
         LoadTodos();
-
-        ClickCategory(todoCategories[0]);
+        if (todoCategories.Count > 0)
+            ClickCategory(todoCategories[0]);
     }
+
     public void AddButton()
     {
-        if (TodoToggle.isOn == true) AddTodo();
-        else AddCategory();
-        TodoSaveManager.Instance.Save(todoCategories);
+        AddTodo();
     }
 
-    #region Todo
     public void AddTodo()
     {
-        string todo = TodoInputField.text;
+        TodoInputField.DeactivateInputField();
+        string todoText = TodoInputField.text;
+        if (todoText == null || todoText.Length <= 0) return;
 
-        if (todo == null || todo.Length == 0) return;
+        int categoryIndex = GetCategoryIndex(activeCategoryId);
+        if (categoryIndex == -1) return;
 
-        GameObject todoContent = InstantiateBelow(TodoContentPrefab, TodoTextGameObject);
+        int scrollbarId = todoCategories[categoryIndex].ScrollBarId;
+        GameObject scrollbarObj = GetScrollbarGameObject(scrollbarId);
+        if (scrollbarObj == null) return;
 
-        TodoContent content = todoContent.GetComponent<TodoContent>();
-        content.todo.Title = todo;
+        Transform contentParent = scrollbarObj.transform.GetChild(0).GetChild(0);
+
+        GameObject newTodo = Instantiate(TodoContentPrefab, contentParent);
+        TodoContent content = newTodo.GetComponent<TodoContent>();
+
+        content.todo.Title = todoText;
         content.todo.IsCompleted = false;
-        content.todo.Item = todoContent;
-        content.todo.SetToggle(false);
+        content.todo.Id = GetAvailableTodoId();
+
+        todoCategories[categoryIndex].Todos.Add(content.todo);
 
         TodoInputField.text = null;
     }
-    public void ClickTodo(Todo todo)
+/*
+    public void ClickTodo(bool state, Todo todo)
     {
-        if (currentProcess == TodoProcess.Add)
-        {
-            if (todo.IsReceived == false)
-            {
-                todo.IsReceived = true;
-                MoveTodo(todo, TodoNowTextGameObject);
-            }
-            else if (todo.IsCompleted == false && todo.IsReceived == true)
-            {
-                todo.IsCompleted = true;
-                MoveTodo(todo, DoneTextGameObject);
-            }
-            todo.SetToggle(todo.IsCompleted);
-        }
-        else if (currentProcess == TodoProcess.Delete)
-        {
-            DeleteTodo(todo);
-        }
-        else if (currentProcess == TodoProcess.Reset)
-        {
-            Debug.Log(currentProcess);
-            ResetTodo(todo);
-        }
-        ChangeProcess("Add");
-        TodoSaveManager.Instance.Save(todoCategories);
+        //MoveTodo(state, todo);
     }
-    public void ChangeProcess(string process)
-    {
-        switch (process)
-        {
-            case "Add":
-                currentProcess = TodoProcess.Add;
-                break;
-            case "Delete":
-                currentProcess = TodoProcess.Delete;
-                break;
-            case "Reset":
-                currentProcess = TodoProcess.Reset;
-                break;
-        }
-    }
-    public void ResetTodo(Todo todo)
-    {
-        todo.IsCompleted = false;
-        todo.IsReceived = false;
-        todo.SetToggle(false);
-        MoveTodo(todo, TodoTextGameObject);
-    }
+*/
     public void DeleteTodo(Todo todo)
     {
         var categoryIndex = GetCategoryIndex(activeCategoryId);
@@ -128,110 +84,117 @@ public class TodoManager : MonoBehaviour
             todoCategories[categoryIndex].Todos.Remove(todo);
         }
 
-        Destroy(todo.Item);
+        var obj = GetTodoGameObject(todo.Id);
+        if (obj != null)
+            Destroy(obj);
     }
-    private void MoveTodo(Todo todo, GameObject target)
+/*
+    private void MoveTodo(bool state, Todo todo)
     {
-        Debug.Log(target);
-        GameObject obj = todo.Item;
-        int targetIndex = target.transform.GetSiblingIndex();
-        Debug.Log(targetIndex + 1);
-        if (obj.transform.GetSiblingIndex() > targetIndex + 1)
-            obj.transform.SetSiblingIndex(targetIndex + 1);
-        else if (obj.transform.GetSiblingIndex() < targetIndex + 1)
-            obj.transform.SetSiblingIndex(targetIndex);
-    }
-    private GameObject InstantiateBelow(GameObject prefab, GameObject target)
-    {
-        GameObject newObj = Instantiate(prefab, target.transform.parent);
-        int targetIndex = target.transform.GetSiblingIndex();
-        newObj.transform.SetSiblingIndex(targetIndex + 1);
-        todoCategories[GetCategoryIndex(activeCategoryId)].Todos.Add(newObj.GetComponent<TodoContent>().todo);
-        return newObj;
-    }
-    #endregion
+        var todoObj = GetTodoGameObject(todo.Id);
+        if (todoObj == null) return;
 
-    #region Category
+        if (state)
+            todoObj.transform.SetSiblingIndex(todoObj.transform.parent.childCount - 1);
+        else
+            todoObj.transform.SetSiblingIndex(0);
+    }
+*/
+    private GameObject GetTodoGameObject(int Id)
+    {
+        int categoryIndex = GetCategoryIndex(activeCategoryId);
+        if (categoryIndex == -1) return null;
+
+        int scrollbarId = todoCategories[categoryIndex].ScrollBarId;
+        GameObject scrollbarObj = GetScrollbarGameObject(scrollbarId);
+        if (scrollbarObj == null) return null;
+
+        Transform contentParent = scrollbarObj.transform.GetChild(0).GetChild(0);
+        foreach (Transform child in contentParent)
+        {
+            TodoContent todoContent = child.GetComponent<TodoContent>();
+            if (todoContent != null && todoContent.todo.Id == Id)
+                return child.gameObject;
+        }
+        return null;
+    }
+
     public void AddCategory()
     {
-        Category newCategory = new Category();
-        newCategory.Id = GetAvailableId();
-        newCategory.Name = TodoInputField.text; ;
-        newCategory.CategoryItem = Instantiate(CategoryPrefab, CategoryParent);
-        newCategory.CategoryItem.GetComponent<TodoCategory>().category = newCategory;
-        newCategory.CategoryScrollBar = Instantiate(CategoryScrollBarPrefab, CategoryScrollBarParent);
-        newCategory.CategoryScrollBar.transform.SetSiblingIndex(1);
+        TodoInputField.DeactivateInputField();
+        string categoryText = CategoryInputField.text;
+        if (categoryText == null || categoryText.Length <= 0) return;
+
+        int availableId = GetAvailableCategoryId();
+        Category newCategory = new Category
+        {
+            Id = availableId,
+            ScrollBarId = availableId,
+            Title = categoryText
+        };
+
+        GameObject CategoryItem = Instantiate(CategoryPrefab, CategoryParent);
+        CategoryItem.GetComponent<TodoCategory>().category = newCategory;
+        CategoryItem.GetComponent<TodoCategory>().Setup(newCategory);
+
+        GameObject CategoryScrollBar = Instantiate(CategoryScrollBarPrefab, CategoryScrollBarParent);
+        CategoryScrollBar.transform.SetSiblingIndex(1);
+        CategoryScrollBar.GetComponent<TodoScrollbar>().scrollbar = new Scrollbar { Id = newCategory.ScrollBarId };
+
         todoCategories.Add(newCategory);
-        TodoInputField.text = null;
+
+        CategoryItem.transform.SetSiblingIndex(0);
+        CategoryInputField.text = null;
+
+        ClickCategory(newCategory);
     }
+
     public void ClickCategory(Category category)
     {
-        if (currentProcess == TodoProcess.Add)
-        {
-            activeCategoryId = category.Id;
-            ChangeScrollBar(category.Id);
-            GameObject obj = todoCategories[GetCategoryIndex(activeCategoryId)].CategoryScrollBar;
-
-            if (obj.transform.GetChild(0).GetChild(0).gameObject.name.Contains("Content"))
-            {
-                TodoTextGameObject = obj.transform.GetChild(0).GetChild(0).Find("TodoText").gameObject;
-                TodoNowTextGameObject = obj.transform.GetChild(0).GetChild(0).Find("TodoNowText").gameObject;
-                DoneTextGameObject = obj.transform.GetChild(0).GetChild(0).Find("DoneText").gameObject;
-            }
-            else Debug.Log("Bulamadı Content adında bişi");
-        }
-        else if (currentProcess == TodoProcess.Delete)
-        {
-            DeleteCategory(category);
-        }
-        TodoSaveManager.Instance.Save(todoCategories);
+        activeCategoryId = category.Id;
+        ChangeScrollBar(category.ScrollBarId);
     }
+
     public void DeleteCategory(Category category)
     {
-        if(todoCategories.Count == 1) return;
+        if (todoCategories.Count == 1) return;
 
         todoCategories.Remove(category);
-        Destroy(category.CategoryItem);
-        Destroy(category.CategoryScrollBar);
-
-        ChangeProcess("Add");
+        Destroy(GetCategoryGameObject(category.Id));
+        Destroy(GetScrollbarGameObject(category.ScrollBarId));
 
         ClickCategory(todoCategories[0]);
     }
+
     public void ChangeScrollBar(int Id)
     {
-        for (int i = 0; i < todoCategories.Count; i++)
+        for (int i = 0; i < CategoryScrollBarParent.transform.childCount; i++)
         {
-            if (todoCategories[i].Id == Id)
+            var obj = CategoryScrollBarParent.transform.GetChild(i).gameObject;
+            var scrollBar = obj.GetComponent<TodoScrollbar>();
+            if (scrollBar != null && scrollBar.scrollbar.Id == Id)
             {
-                todoCategories[i].CategoryScrollBar.SetActive(true);
+                // Sadece seçilen açık olsun
+                obj.SetActive(true);
             }
-            else
+            else if (scrollBar != null && scrollBar.scrollbar.Id != Id)
             {
-                todoCategories[i].CategoryScrollBar.SetActive(false);
+                obj.SetActive(false);
             }
         }
     }
+
     private int GetCategoryIndex(int id)
     {
         for (int i = 0; i < todoCategories.Count; i++)
-        {
             if (todoCategories[i].Id == id)
                 return i;
-        }
         return -1;
     }
-    private int GetAvailableId()
+
+    private int GetAvailableCategoryId()
     {
-        HashSet<int> existingIds = new HashSet<int>();
-        for (int i = 0; i < CategoryParent.childCount; i++)
-        {
-            TodoCategory content = CategoryParent.GetChild(i).GetComponent<TodoCategory>();
-            if (content != null)
-            {
-                existingIds.Add(content.category.Id);
-            }
-        }
+        HashSet<int> existingIds = new HashSet<int>(todoCategories.Select(c => c.Id).Concat(todoCategories.Select(c => c.ScrollBarId)));
         while (true)
         {
             int id = Random.Range(0, 10000);
@@ -239,17 +202,76 @@ public class TodoManager : MonoBehaviour
                 return id;
         }
     }
-    #endregion
-    private void OnApplicationPause(bool pause)
+
+    private int GetAvailableTodoId()
     {
-        if (pause)
+        HashSet<int> existingIds = new HashSet<int>(todoCategories.SelectMany(c => c.Todos).Select(t => t.Id));
+        while (true)
         {
-            TodoSaveManager.Instance?.Save(todoCategories);
+            int id = Random.Range(0, 100000);
+            if (!existingIds.Contains(id))
+                return id;
         }
     }
-    private void OnApplicationQuit()
+
+    private GameObject GetCategoryGameObject(int id)
     {
-        TodoSaveManager.Instance?.Save(todoCategories);
+        for (int i = 0; i < CategoryParent.childCount; i++)
+        {
+            TodoCategory content = CategoryParent.GetChild(i).GetComponent<TodoCategory>();
+            if (content != null && content.category.Id == id)
+                return content.gameObject;
+        }
+        return null;
+    }
+
+    private GameObject GetScrollbarGameObject(int id)
+    {
+        for (int i = 0; i < CategoryScrollBarParent.childCount; i++)
+        {
+            TodoScrollbar content = CategoryScrollBarParent.GetChild(i).GetComponent<TodoScrollbar>();
+            if (content != null && content.scrollbar.Id == id)
+                return CategoryScrollBarParent.GetChild(i).gameObject;
+        }
+        return null;
+    }
+    public void AddCategoryFromSave(SerializableCategory sCat)
+    {
+        Category newCategory = new Category
+        {
+            Id = sCat.Id,
+            ScrollBarId = sCat.ScrollbarId,
+            Title = sCat.Title
+        };
+
+        GameObject CategoryItem = Instantiate(CategoryPrefab, CategoryParent);
+        CategoryItem.GetComponent<TodoCategory>().category = newCategory;
+        CategoryItem.GetComponent<TodoCategory>().Setup(newCategory);
+
+        GameObject CategoryScrollBar = Instantiate(CategoryScrollBarPrefab, CategoryScrollBarParent);
+        CategoryScrollBar.transform.SetSiblingIndex(1);
+        CategoryScrollBar.GetComponent<TodoScrollbar>().scrollbar = new Scrollbar { Id = newCategory.ScrollBarId };
+
+        todoCategories.Add(newCategory);
+        CategoryItem.transform.SetSiblingIndex(0);
+
+        // Bu kategoriye ait todo'ları ekle
+        activeCategoryId = newCategory.Id;
+        foreach (var sTodo in sCat.Todos)
+        {
+            GameObject scrollbarObj = GetScrollbarGameObject(newCategory.ScrollBarId);
+            if (scrollbarObj == null) continue;
+
+            Transform contentParent = scrollbarObj.transform.GetChild(0).GetChild(0);
+            GameObject newTodo = Instantiate(TodoContentPrefab, contentParent);
+            TodoContent content = newTodo.GetComponent<TodoContent>();
+
+            content.todo.Title = sTodo.Title;
+            content.todo.IsCompleted = sTodo.IsCompleted;
+            content.todo.Id = sTodo.Id;
+
+            newCategory.Todos.Add(content.todo);
+        }
     }
     public void LoadTodos()
     {
@@ -259,83 +281,56 @@ public class TodoManager : MonoBehaviour
         // Eski verileri temizle
         foreach (Category cat in todoCategories)
         {
-            Destroy(cat.CategoryItem);
-            Destroy(cat.CategoryScrollBar);
+            Destroy(GetCategoryGameObject(cat.Id));
+            Destroy(GetScrollbarGameObject(cat.ScrollBarId));
         }
         todoCategories.Clear();
 
         // Yeniden oluştur
         foreach (var sCat in loadedCategories)
         {
-            TodoInputField.text = sCat.Name;
-            AddCategory();
-            int index = todoCategories.Count - 1;
-            Category createdCat = todoCategories[index];
-            createdCat.Id = sCat.Id;
-            createdCat.Name = sCat.Name;
+            AddCategoryFromSave(sCat);
+        }
 
-            ClickCategory(createdCat);
-
-            TodoTextGameObject = createdCat.CategoryScrollBar.transform.GetChild(0).GetChild(0).transform.Find("TodoText").gameObject;
-            TodoNowTextGameObject = createdCat.CategoryScrollBar.transform.GetChild(0).GetChild(0).transform.Find("TodoNowText").gameObject;
-            DoneTextGameObject = createdCat.CategoryScrollBar.transform.GetChild(0).GetChild(0).transform.Find("DoneText").gameObject;
-
-            foreach (var sTodo in sCat.Todos)
-            {
-                TodoInputField.text = sTodo.Title;
-                AddTodo();
-                Todo lastTodo = createdCat.Todos.Last();
-
-                lastTodo.IsReceived = sTodo.IsReceived;
-                lastTodo.IsCompleted = sTodo.IsCompleted;
-                lastTodo.Item = lastTodo.Item ?? lastTodo.Item; // garanti
-
-                // Doğru pozisyona taşı
-                if (lastTodo.IsCompleted)
-                {
-                    MoveTodo(lastTodo, DoneTextGameObject);
-                }
-                else if (lastTodo.IsReceived)
-                {
-                    MoveTodo(lastTodo, TodoNowTextGameObject);
-                }
-                else
-                {
-                    MoveTodo(lastTodo, TodoTextGameObject);
-                }
-                lastTodo.SetToggle(lastTodo.IsCompleted);
-            }
+        // İlk kategoriyi aktif yap
+        if (todoCategories.Count > 0)
+        {
+            ClickCategory(todoCategories[0]);
         }
 
         TodoInputField.text = null;
     }
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+            TodoSaveManager.Instance?.Save(todoCategories);
+    }
 
+    private void OnApplicationQuit()
+    {
+        TodoSaveManager.Instance?.Save(todoCategories);
+    }
 }
+
 [System.Serializable]
 public class Todo
 {
     public string Title;
-    public GameObject Item;
-    public bool IsReceived;
+    public int Id;
     public bool IsCompleted;
-    public void SetToggle(bool state)
-    {
-        Toggle toggle = Item.GetComponentInChildren<Toggle>();
-        if (toggle != null) toggle.isOn = state;
-    }
 }
+
 [System.Serializable]
 public class Category
 {
+    public string Title;
     public int Id;
-    public string Name;
-    public GameObject CategoryItem;
-    public GameObject CategoryScrollBar;
+    public int ScrollBarId;
     public List<Todo> Todos = new List<Todo>();
 }
-public enum TodoProcess
+
+[System.Serializable]
+public class Scrollbar
 {
-    Add,
-    Delete,
-    Reset
+    public int Id;
 }

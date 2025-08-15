@@ -21,14 +21,14 @@ public class TodoSaveManager : MonoBehaviour
         {
             SerializableCategory sCat = new SerializableCategory();
             sCat.Id = cat.Id;
-            sCat.Name = cat.Name;
+            sCat.ScrollbarId = cat.ScrollBarId;
+            sCat.Title = cat.Title;
 
             foreach (Todo t in cat.Todos)
             {
                 SerializableTodo sTodo = new SerializableTodo
                 {
                     Title = t.Title,
-                    IsReceived = t.IsReceived,
                     IsCompleted = t.IsCompleted
                 };
                 sCat.Todos.Add(sTodo);
@@ -61,7 +61,7 @@ public class TodoSaveManager : MonoBehaviour
 public class SerializableTodo
 {
     public string Title;
-    public bool IsReceived;
+    public int Id;
     public bool IsCompleted;
 }
 
@@ -69,7 +69,8 @@ public class SerializableTodo
 public class SerializableCategory
 {
     public int Id;
-    public string Name;
+    public int ScrollbarId;
+    public string Title;
     public List<SerializableTodo> Todos = new List<SerializableTodo>();
 }
 

@@ -5,12 +5,21 @@ public class TodoCategory : MonoBehaviour
 {
     public Category category;
     private Text text;
-    private Button button;
-    void Start()
+    private Button clickButton;
+    private Button trashButton;
+
+    public void Setup(Category cat)
     {
-        text = GetComponentInChildren<Text>();
-        button = GetComponent<Button>();
-        text.text = category.Name;
-        button.onClick.AddListener(() => TodoManager.Instance.ClickCategory(category));
+        category = cat;
+        text = transform.GetChild(2).GetComponent<Text>();
+        clickButton = transform.GetChild(0).GetComponent<Button>();
+        trashButton = transform.GetChild(1).GetComponent<Button>();
+
+        if (category != null)
+            text.text = category.Title;
+
+        clickButton.onClick.AddListener(() => TodoManager.Instance.ClickCategory(category));
+
+        trashButton.onClick.AddListener(() => TodoManager.Instance.DeleteCategory(category));
     }
 }
