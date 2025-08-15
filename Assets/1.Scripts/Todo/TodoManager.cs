@@ -17,6 +17,9 @@ public class TodoManager : MonoBehaviour
     [SerializeField] private GameObject TodoContentPrefab;
     [SerializeField] private TMP_InputField TodoInputField;
 
+    [Header("General References")]
+    [SerializeField] private Text emptyText;
+
     [Header("Data")]
     private List<Category> todoCategories = new List<Category>();
     [SerializeField] private int activeCategoryId;
@@ -70,13 +73,15 @@ public class TodoManager : MonoBehaviour
         todoCategories[categoryIndex].Todos.Add(content.todo);
 
         TodoInputField.text = null;
+
+        SetEmptyText();
     }
-/*
-    public void ClickTodo(bool state, Todo todo)
-    {
-        //MoveTodo(state, todo);
-    }
-*/
+    /*
+        public void ClickTodo(bool state, Todo todo)
+        {
+            //MoveTodo(state, todo);
+        }
+    */
     public void DeleteTodo(Todo todo)
     {
         var categoryIndex = GetCategoryIndex(activeCategoryId);
@@ -88,6 +93,8 @@ public class TodoManager : MonoBehaviour
         var obj = GetTodoGameObject(todo.Id);
         if (obj != null)
             Destroy(obj);
+            
+        SetEmptyText();
     }
 /*
     private void MoveTodo(bool state, Todo todo)
@@ -154,6 +161,8 @@ public class TodoManager : MonoBehaviour
     {
         activeCategoryId = category.Id;
         ChangeScrollBar(category.ScrollBarId);
+
+        SetEmptyText();
     }
 
     public void DeleteCategory(Category category)
@@ -184,7 +193,25 @@ public class TodoManager : MonoBehaviour
             }
         }
     }
-
+    private void SetEmptyText()
+    {
+        if (IsActiveCategoryEmpty())
+        {
+            emptyText.gameObject.SetActive(true);
+            int categoryIndex = GetCategoryIndex(activeCategoryId);
+            emptyText.text = $"{todoCategories[categoryIndex].Title} is Empty";
+        }
+        else
+        {
+            emptyText.gameObject.SetActive(false);
+        }
+    }
+    private bool IsActiveCategoryEmpty()
+    {
+        int categoryIndex = GetCategoryIndex(activeCategoryId);
+        if (categoryIndex == -1) return true;
+        return todoCategories[categoryIndex].Todos.Count <= 0;
+    }
     private int GetCategoryIndex(int id)
     {
         for (int i = 0; i < todoCategories.Count; i++)
@@ -192,7 +219,6 @@ public class TodoManager : MonoBehaviour
                 return i;
         return -1;
     }
-
     private int GetAvailableCategoryId()
     {
         HashSet<int> existingIds = new HashSet<int>(todoCategories.Select(c => c.Id).Concat(todoCategories.Select(c => c.ScrollBarId)));
