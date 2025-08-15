@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using TMPro;
 
 public class TodoManager : MonoBehaviour
 {
@@ -10,11 +11,11 @@ public class TodoManager : MonoBehaviour
     [SerializeField] private GameObject CategoryScrollBarPrefab;
     [SerializeField] private Transform CategoryParent;
     [SerializeField] private Transform CategoryScrollBarParent;
-    [SerializeField] private InputField CategoryInputField;
+    [SerializeField] private TMP_InputField CategoryInputField;
 
     [Header("Todo References")]
     [SerializeField] private GameObject TodoContentPrefab;
-    [SerializeField] private InputField TodoInputField;
+    [SerializeField] private TMP_InputField TodoInputField;
 
     [Header("Data")]
     private List<Category> todoCategories = new List<Category>();

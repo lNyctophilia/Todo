@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class InputFieldKeyboardAdjust : MonoBehaviour, ISelectHandler, IDeselectHandler
+public class InputFieldKeyboardAdjust : MonoBehaviour, IDeselectHandler
 {
     public RectTransform panelToMove;
     public Toggle panelToggle;
@@ -15,28 +15,28 @@ public class InputFieldKeyboardAdjust : MonoBehaviour, ISelectHandler, IDeselect
 
     void Update()
     {
-#if UNITY_ANDROID || UNITY_IOS
-        if (Input.GetKeyDown(KeyCode.Escape)) // Android geri tuşu
+    #if UNITY_ANDROID || UNITY_IOS
+        // Android geri tuşu ile kapatma
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             panelToMove.gameObject.SetActive(false);
-            panelToggle.isOn = false;
-            EventSystem.current.SetSelectedGameObject(null); // focusu temizle
+            if (panelToggle) panelToggle.isOn = false;
+            EventSystem.current.SetSelectedGameObject(null);
         }
-#endif
-    }
 
-    public void OnSelect(BaseEventData eventData)
-    {
-#if UNITY_ANDROID || UNITY_IOS
-        float height = TouchScreenKeyboard.area.height;
-        panelToMove.anchoredPosition = originalPos + new Vector2(0, height);
-        panelToMove.gameObject.SetActive(true);
-#endif
+        // Klavye yüksekliği (UI birimi)
+        int kbd = MobileUtilities.GetKeyboardHeightUI(panelToMove);
+
+        // Ufak oynama/jitter engellemek için bir eşik koyduk
+        if (kbd > 10)
+            panelToMove.anchoredPosition = originalPos + new Vector2(0, kbd);
+        else
+            panelToMove.anchoredPosition = originalPos;
+    #endif
     }
 
     public void OnDeselect(BaseEventData eventData)
     {
-        // artık burada paneli kapatma yok!
         panelToMove.anchoredPosition = originalPos;
     }
 }

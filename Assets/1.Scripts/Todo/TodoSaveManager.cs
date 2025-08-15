@@ -29,6 +29,7 @@ public class TodoSaveManager : MonoBehaviour
                 SerializableTodo sTodo = new SerializableTodo
                 {
                     Title = t.Title,
+                    Id = t.Id,
                     IsCompleted = t.IsCompleted
                 };
                 sCat.Todos.Add(sTodo);
