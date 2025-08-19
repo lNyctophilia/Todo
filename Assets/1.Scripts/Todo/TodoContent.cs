@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class TodoContent : MonoBehaviour
     private Toggle toggle;
     private Button trashButton;
     private Image contentImage;
-    
+
     private void Start()
     {
         contentImage = GetComponent<Image>();
@@ -19,7 +20,7 @@ public class TodoContent : MonoBehaviour
 
         toggle.isOn = todo.IsCompleted;
         title.text = todo.Title;
-        contentImage.color = toggle.isOn ? new Color(0.1803922f, 0.1803922f, 0.1803922f, 0.7f) :  new Color(0.1803922f, 0.1803922f, 0.1803922f, 1f);
+        contentImage.color = toggle.isOn ? new Color(0.1803922f, 0.1803922f, 0.1803922f, 0.7f) : new Color(0.1803922f, 0.1803922f, 0.1803922f, 1f);
         title.fontStyle = toggle.isOn ? TMPro.FontStyles.Strikethrough : TMPro.FontStyles.Normal;
 
 
@@ -27,7 +28,7 @@ public class TodoContent : MonoBehaviour
         {
             todo.IsCompleted = value;
             toggle.isOn = value;
-            contentImage.color = value ? new Color(0.1803922f, 0.1803922f, 0.1803922f, 0.7f) :  new Color(0.1803922f, 0.1803922f, 0.1803922f, 1f);
+            contentImage.color = value ? new Color(0.1803922f, 0.1803922f, 0.1803922f, 0.7f) : new Color(0.1803922f, 0.1803922f, 0.1803922f, 1f);
             title.fontStyle = value ? TMPro.FontStyles.Strikethrough : TMPro.FontStyles.Normal;
             //if (value) TodoManager.Instance.ClickTodo(value, todo);
         });

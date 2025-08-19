@@ -22,7 +22,7 @@ public class TodoManager : MonoBehaviour
 
     [Header("Data")]
     private List<Category> todoCategories = new List<Category>();
-    [SerializeField] private int activeCategoryId;
+    [SerializeField] public int activeCategoryId;
 
     public static TodoManager Instance;
 
@@ -82,6 +82,24 @@ public class TodoManager : MonoBehaviour
             //MoveTodo(state, todo);
         }
     */
+    public void UpdateTodoOrder(Transform contentParent)
+    {
+        var sb = contentParent.GetComponentInParent<TodoScrollbar>();
+        if (sb == null) return;
+
+        int categoryIndex = todoCategories.FindIndex(c => c.ScrollBarId == sb.scrollbar.Id);
+        if (categoryIndex == -1) return;
+
+        var newOrder = new List<Todo>();
+        foreach (Transform child in contentParent)
+        {
+            var tc = child.GetComponent<TodoContent>();
+            if (tc != null) newOrder.Add(tc.todo);
+        }
+        todoCategories[categoryIndex].Todos = newOrder;
+
+        TodoSaveManager.Instance?.Save(todoCategories);
+    }
     public void DeleteTodo(Todo todo)
     {
         var categoryIndex = GetCategoryIndex(activeCategoryId);
@@ -93,21 +111,35 @@ public class TodoManager : MonoBehaviour
         var obj = GetTodoGameObject(todo.Id);
         if (obj != null)
             Destroy(obj);
-            
+
         SetEmptyText();
     }
-/*
-    private void MoveTodo(bool state, Todo todo)
+    // UI sırasına göre todoCategories listesini yeniden diz
+    public void UpdateCategoryOrder(Transform categoryParent)
     {
-        var todoObj = GetTodoGameObject(todo.Id);
-        if (todoObj == null) return;
+        var newOrder = new List<Category>();
+        foreach (Transform child in categoryParent)
+        {
+            var tc = child.GetComponent<TodoCategory>();
+            if (tc != null) newOrder.Add(tc.category);
+        }
+        todoCategories = newOrder;
 
-        if (state)
-            todoObj.transform.SetSiblingIndex(todoObj.transform.parent.childCount - 1);
-        else
-            todoObj.transform.SetSiblingIndex(0);
+        // Anında kaydetmek istiyorsan:
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
-*/
+/*
+        private void MoveTodo(bool state, Todo todo)
+        {
+            var todoObj = GetTodoGameObject(todo.Id);
+            if (todoObj == null) return;
+
+            if (state)
+                todoObj.transform.SetSiblingIndex(todoObj.transform.parent.childCount - 1);
+            else
+                todoObj.transform.SetSiblingIndex(0);
+        }
+    */
     private GameObject GetTodoGameObject(int Id)
     {
         int categoryIndex = GetCategoryIndex(activeCategoryId);
@@ -280,7 +312,7 @@ public class TodoManager : MonoBehaviour
         CategoryScrollBar.GetComponent<TodoScrollbar>().scrollbar = new Scrollbar { Id = newCategory.ScrollBarId };
 
         todoCategories.Add(newCategory);
-        CategoryItem.transform.SetSiblingIndex(0);
+        CategoryItem.transform.SetSiblingIndex(CategoryParent.childCount - 2);
 
         // Bu kategoriye ait todo'ları ekle
         activeCategoryId = newCategory.Id;
