@@ -40,7 +40,7 @@ public class DragManager : MonoBehaviour
 
             foreach (var result in results)
             {
-                if (result.gameObject.GetComponent<TodoContent>() != null || result.gameObject.GetComponent<TodoCategory>() != null)
+                if (result.gameObject.GetComponent<TodoContent>() != null || result.gameObject.GetComponent<TodoCategory>() != null || result.gameObject.GetComponent<StreakContent>() != null)
                 {
                     currentItem = result.gameObject;
                     itemRect = currentItem.GetComponent<RectTransform>();
@@ -101,7 +101,7 @@ public class DragManager : MonoBehaviour
     {
         if (currentItem == null) return;
 
-        if (currentItem.GetComponent<TodoContent>() != null)
+        if (currentItem.GetComponent<TodoContent>() != null || currentItem.GetComponent<StreakContent>() != null)
         {
             verticalOnly = true;
             horizontalOnly = false;

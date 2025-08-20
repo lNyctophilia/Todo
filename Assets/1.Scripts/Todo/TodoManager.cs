@@ -225,7 +225,7 @@ public class TodoManager : MonoBehaviour
             }
         }
     }
-    private void SetEmptyText()
+    public void SetEmptyText()
     {
         if (IsActiveCategoryEmpty())
         {
