@@ -29,14 +29,15 @@ https://github.com/user-attachments/assets/3e842428-936a-46f4-9dd4-288527497538
 
 ## 🎯 Objective
 
--Create categories to organize your todos (e.g., Morning Routine, Work, Evening Tasks).
--Add todos inside categories and mark them complete with a simple tap.
--Create streaks by entering a title and start date (e.g., Quit Sugar, Daily Exercise).
--Automatically track how many days have passed since your streak started.
--Delete todos or entire categories and streaks with a trash button.
--Reorder todos, categories, and streaks by long-pressing and dragging.
+- Create categories to organize your todos (e.g., Morning Routine, Work, Evening Tasks).
+- Add todos inside categories and mark them complete with a simple tap.
+- Create streaks by entering a title and start date (e.g., Quit Sugar, Daily Exercise).
+- Automatically track how many days have passed since your streak started.
+- Delete todos or entire categories and streaks with a trash button.
+- Reorder todos, categories, and streaks by long-pressing and dragging.
 
-⚠️Note: All data is stored locally on your personal device. The developer does not take responsibility for any data loss. By downloading and using this app, you agree that potential information loss is solely the user’s responsibility.
+⚠️Note : 
+- All data is stored locally on your personal device. The developer does not take responsibility for any data loss. By downloading and using this app, you agree that potential information loss is solely the user’s responsibility.
 
 
 ---
