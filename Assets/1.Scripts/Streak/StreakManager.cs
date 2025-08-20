@@ -28,7 +28,7 @@ public class StreakManager : MonoBehaviour
     public void AddStreak()
     {
         if (titleInputField == null || titleInputField.text.Length <= 0) return;
-        if (dateInputField == null || dateInputField.text.Length <= 0) return;
+        if (dateInputField == null || GetDate() == DateTime.MinValue || dateInputField.text.Length <= 0) return;
 
         GameObject newStreak = Instantiate(streakContentPrefab, streakScrollRectContent);
 
