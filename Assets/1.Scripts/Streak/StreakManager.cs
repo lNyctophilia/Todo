@@ -36,7 +36,7 @@ public class StreakManager : MonoBehaviour
         {
             streakContent.streak.Id = GetAvailableStreakId();
             streakContent.streak.Title = titleInputField.text;
-            streakContent.streak.TotalDayCount = (DateTime.Now - GetDate()).Days; 
+            streakContent.streak.StartDateTicks = GetDate().Ticks;
         }
 
         titleInputField.text = null;
@@ -123,9 +123,8 @@ public class StreakManager : MonoBehaviour
 }
 
 [Serializable]
-public class Streak
-{
+public class Streak {
     public int Id;
     public string Title;
-    public int TotalDayCount;
+    public long StartDateTicks; // uzun sayı
 }

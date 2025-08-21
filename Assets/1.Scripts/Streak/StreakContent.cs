@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Globalization;
 
 public class StreakContent : MonoBehaviour
 {
@@ -12,7 +13,6 @@ public class StreakContent : MonoBehaviour
     private Button trashButton;
 
     [Header("Data")]
-    private DateTime StartDate;
     public Streak streak = new Streak();
 
     private void Awake()
@@ -22,27 +22,22 @@ public class StreakContent : MonoBehaviour
         totalDayCountTMP = transform.Find("TotalDayCount").GetComponent<TextMeshProUGUI>();
         trashButton = transform.Find("TrashButton").GetComponent<Button>();
     }
-
     private void Start()
     {
-        // Kaydedilen total day count'tan başlangıç tarihi hesapla
-        StartDate = DateTime.Now.AddDays(-streak.TotalDayCount);
-
         RefreshUI();
-
-        trashButton.onClick.AddListener(() => StreakManager.Instance.DeleteStreak(streak));
+        
+        trashButton.onClick.AddListener(() => StreakManager.Instance?.DeleteStreak(streak));
     }
-
     private void OnEnable()
     {
-        // Tekrar enable olduğunda UI'yi güncelle
         RefreshUI();
     }
-
     private void RefreshUI()
     {
+        DateTime startDate = new DateTime(streak.StartDateTicks);
+
         titleTMP.text = streak.Title;
-        startDateTMP.text = StartDate.ToString("dd.MM.yyyy") + " :";
-        totalDayCountTMP.text = "Day " + ((DateTime.Now - StartDate).Days + 1).ToString();
+        startDateTMP.text = startDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+        totalDayCountTMP.text = "Day " + ((DateTime.Now - startDate).Days + 1).ToString();
     }
 }
