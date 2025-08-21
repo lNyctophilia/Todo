@@ -21,7 +21,7 @@ https://github.com/user-attachments/assets/3e842428-936a-46f4-9dd4-288527497538
 
 
 ## Support Me:
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/lNyctophilia)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/lNyctophilia)
 
 
 ---
