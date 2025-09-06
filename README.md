@@ -67,4 +67,6 @@ https://github.com/user-attachments/assets/3e842428-936a-46f4-9dd4-288527497538
 
 - [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 
+> This project is free for **personal and educational use**, but cannot be used commercially.
+
 
