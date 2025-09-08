@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -34,7 +35,24 @@ public class StreakSaveManager : MonoBehaviour
         File.WriteAllText(SavePath, json);
         Debug.Log("Kayıt yapıldı: " + SavePath);
     }
+    public void Backup()
+    {
+        if (!File.Exists(SavePath))
+        {
+            Debug.LogWarning("Backup alınamadı, kayıt dosyası yok.");
+            return;
+        }
 
+        string backupDir = Application.persistentDataPath + "/Backups/Todo";
+        if (!Directory.Exists(backupDir))
+            Directory.CreateDirectory(backupDir);
+
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        string backupPath = Path.Combine(backupDir, $"todosave_{timestamp}.json");
+
+        File.Copy(SavePath, backupPath, true);
+        Debug.Log("Todo backup kaydedildi: " + backupPath);
+    }
     public List<Streak> Load()
     {
         if (!File.Exists(SavePath))
