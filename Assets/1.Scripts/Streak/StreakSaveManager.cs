@@ -43,15 +43,15 @@ public class StreakSaveManager : MonoBehaviour
             return;
         }
 
-        string backupDir = Application.persistentDataPath + "/Backups/Todo";
+        string backupDir = Application.persistentDataPath + "/Backups/Streak";
         if (!Directory.Exists(backupDir))
             Directory.CreateDirectory(backupDir);
 
         string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        string backupPath = Path.Combine(backupDir, $"todosave_{timestamp}.json");
+        string backupPath = Path.Combine(backupDir, $"streaksave_{timestamp}.json");
 
         File.Copy(SavePath, backupPath, true);
-        Debug.Log("Todo backup kaydedildi: " + backupPath);
+        Debug.Log("Streak backup kaydedildi: " + backupPath);
     }
     public List<Streak> Load()
     {
