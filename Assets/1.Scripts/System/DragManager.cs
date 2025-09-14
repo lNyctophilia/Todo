@@ -208,14 +208,17 @@ private void EndDrag()
     // Order güncelle
     var todoContent = currentItem.GetComponent<TodoContent>();
     var todoCategory = currentItem.GetComponent<TodoCategory>();
+    var streakContent = currentItem.GetComponent<StreakContent>();
 
     if (todoContent != null)
         TodoManager.Instance.UpdateTodoOrder(itemRect.parent);
     else if (todoCategory != null)
         TodoManager.Instance.UpdateCategoryOrder(itemRect.parent);
+    else if (streakContent != null)
+        StreakSaveManager.Instance?.Save();
 
     if (parentScrollRect != null)
-        parentScrollRect.enabled = true;
+            parentScrollRect.enabled = true;
 
     // Temizlik
     isDragging = false;

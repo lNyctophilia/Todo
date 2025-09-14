@@ -75,7 +75,11 @@ public class TodoManager : MonoBehaviour
         TodoInputField.text = null;
 
         SetEmptyText();
+
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
+
+    public List<Category> GetCategories() => todoCategories;
 
     public void UpdateTodoOrder(Transform contentParent)
     {
@@ -108,6 +112,8 @@ public class TodoManager : MonoBehaviour
             Destroy(obj);
 
         SetEmptyText();
+
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
 
     public void UpdateCategoryOrder(Transform categoryParent)
@@ -170,6 +176,8 @@ public class TodoManager : MonoBehaviour
         CategoryInputField.text = null;
 
         ClickCategory(newCategory);
+
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
 
     public void ClickCategory(Category category)
@@ -189,6 +197,8 @@ public class TodoManager : MonoBehaviour
         Destroy(GetScrollbarGameObject(category.ScrollBarId));
 
         ClickCategory(todoCategories[0]);
+
+        TodoSaveManager.Instance?.Save(todoCategories);
     }
 
     public void ChangeScrollBar(int Id)
@@ -341,16 +351,6 @@ public class TodoManager : MonoBehaviour
         }
 
         TodoInputField.text = null;
-    }
-    private void OnApplicationPause(bool pause)
-    {
-        if (pause)
-            TodoSaveManager.Instance?.Save(todoCategories);
-    }
-
-    private void OnApplicationQuit()
-    {
-        TodoSaveManager.Instance?.Save(todoCategories);
     }
 }
 

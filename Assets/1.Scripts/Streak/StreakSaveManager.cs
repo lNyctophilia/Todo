@@ -19,10 +19,9 @@ public class StreakSaveManager : MonoBehaviour
         Instance = this;
     }
 
-    public void Save()
+    public void Save(bool allowEmpty = false)
     {
         StreakListWrapper wrapper = new StreakListWrapper();
-        wrapper.streaks.Clear();
 
         for (int i = 0; i < streakScrollRectContent.childCount; i++)
         {
@@ -31,10 +30,22 @@ public class StreakSaveManager : MonoBehaviour
                 wrapper.streaks.Add(streakContent.streak);
         }
 
+        if (wrapper.streaks.Count == 0 && !allowEmpty)
+        {
+            Debug.LogWarning("Boş streak kaydı alınmadı, mevcut dosya korunuyor.");
+            return;
+        }
+
         string json = JsonUtility.ToJson(wrapper, true);
-        File.WriteAllText(SavePath, json);
-        Debug.Log("Kayıt yapıldı: " + SavePath);
+        string tempPath = SavePath + ".tmp";
+        File.WriteAllText(tempPath, json);
+        File.Copy(tempPath, SavePath, true);
+        File.Delete(tempPath);
+
+        Debug.Log("Streak kaydedildi: " + SavePath);
+        Backup();
     }
+
     public void Backup()
     {
         if (!File.Exists(SavePath))
@@ -53,30 +64,35 @@ public class StreakSaveManager : MonoBehaviour
         File.Copy(SavePath, backupPath, true);
         Debug.Log("Streak backup kaydedildi: " + backupPath);
     }
+
     public List<Streak> Load()
     {
         if (!File.Exists(SavePath))
         {
             Debug.LogWarning("Kayıt dosyası bulunamadı.");
-            return null;
+            return new List<Streak>();
         }
 
         string json = File.ReadAllText(SavePath);
+        if (string.IsNullOrEmpty(json))
+        {
+            Debug.LogError("Streak dosyası boş.");
+            return new List<Streak>();
+        }
+
         StreakListWrapper wrapper = JsonUtility.FromJson<StreakListWrapper>(json);
+        if (wrapper == null || wrapper.streaks == null)
+        {
+            Debug.LogError("Streak parse edilemedi.");
+            return new List<Streak>();
+        }
+
         streaks = wrapper.streaks;
         Debug.Log("Kayıt yüklendi, " + streaks.Count + " adet streak bulundu.");
         return streaks;
     }
-
-    private void OnApplicationQuit()
-    {
-        Save();
-    }
-    private void OnApplicationPause(bool pause)
-    {
-        if (pause) Save();
-    }
 }
+
 [System.Serializable]
 public class StreakListWrapper
 {

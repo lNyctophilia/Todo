@@ -30,6 +30,7 @@ public class TodoContent : MonoBehaviour
             toggle.isOn = value;
             contentImage.color = value ? new Color(0.1803922f, 0.1803922f, 0.1803922f, 0.7f) : new Color(0.1803922f, 0.1803922f, 0.1803922f, 1f);
             title.fontStyle = value ? TMPro.FontStyles.Strikethrough : TMPro.FontStyles.Normal;
+            TodoSaveManager.Instance?.Save(TodoManager.Instance?.GetCategories());
             //if (value) TodoManager.Instance.ClickTodo(value, todo);
         });
         trashButton.onClick.AddListener(() => TodoManager.Instance.DeleteTodo(todo));

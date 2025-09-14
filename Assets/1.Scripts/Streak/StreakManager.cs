@@ -43,11 +43,12 @@ public class StreakManager : MonoBehaviour
         dateInputField.text = null;
 
         SetEmptyText();
+        
+        StreakSaveManager.Instance?.Save();
     }
     public void DeleteStreak(Streak streak)
     {
         Destroy(GetStreakGameObject(streak.Id));
-
         Invoke(nameof(SetEmptyText), 0.01f);
     }
     public void SetEmptyText()
@@ -61,6 +62,8 @@ public class StreakManager : MonoBehaviour
         {
             emptyText.gameObject.SetActive(false);
         }
+
+        StreakSaveManager.Instance?.Save(true);
     }
     private GameObject GetStreakGameObject(int id)
     {

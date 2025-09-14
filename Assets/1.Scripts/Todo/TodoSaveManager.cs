@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 public class TodoSaveManager : MonoBehaviour
@@ -20,10 +19,12 @@ public class TodoSaveManager : MonoBehaviour
 
         foreach (Category cat in todoCategories)
         {
-            SerializableCategory sCat = new SerializableCategory();
-            sCat.Id = cat.Id;
-            sCat.ScrollbarId = cat.ScrollBarId;
-            sCat.Title = cat.Title;
+            SerializableCategory sCat = new SerializableCategory
+            {
+                Id = cat.Id,
+                ScrollbarId = cat.ScrollBarId,
+                Title = cat.Title
+            };
 
             foreach (Todo t in cat.Todos)
             {
@@ -39,10 +40,25 @@ public class TodoSaveManager : MonoBehaviour
             saveFile.categories.Add(sCat);
         }
 
+        if (saveFile.categories.Count == 0)
+        {
+            Debug.LogWarning("Boş kayıt alınmadı, mevcut dosya korunuyor.");
+            return;
+        }
+
         string json = JsonUtility.ToJson(saveFile, true);
-        File.WriteAllText(SavePath, json);
+
+        // Geçici dosya yöntemi
+        string tempPath = SavePath + ".tmp";
+        File.WriteAllText(tempPath, json);
+        File.Copy(tempPath, SavePath, true);
+        File.Delete(tempPath);
+
         Debug.Log("Kayıt yapıldı: " + SavePath);
+
+        Backup();
     }
+
     public void Backup()
     {
         if (!File.Exists(SavePath))
@@ -61,16 +77,29 @@ public class TodoSaveManager : MonoBehaviour
         File.Copy(SavePath, backupPath, true);
         Debug.Log("Todo backup kaydedildi: " + backupPath);
     }
+
     public List<SerializableCategory> Load()
     {
         if (!File.Exists(SavePath))
         {
             Debug.LogWarning("Kayıt dosyası bulunamadı.");
-            return null;
+            return new List<SerializableCategory>();
         }
 
         string json = File.ReadAllText(SavePath);
+        if (string.IsNullOrEmpty(json))
+        {
+            Debug.LogError("Kayıt dosyası boş.");
+            return new List<SerializableCategory>();
+        }
+
         TodoSaveFile saveFile = JsonUtility.FromJson<TodoSaveFile>(json);
+        if (saveFile == null || saveFile.categories == null)
+        {
+            Debug.LogError("Kayıt parse edilemedi.");
+            return new List<SerializableCategory>();
+        }
+
         Debug.Log("Kayıt yüklendi.");
         return saveFile.categories;
     }
