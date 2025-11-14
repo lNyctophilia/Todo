@@ -26,7 +26,10 @@ public class StreakContent : MonoBehaviour
     {
         RefreshUI();
         
-        trashButton.onClick.AddListener(() => StreakManager.Instance?.DeleteStreak(streak));
+        trashButton.onClick.AddListener(() =>
+        {
+            Warning.Instance.SetWarningScreen(true, () => StreakManager.Instance?.DeleteStreak(streak));
+        });
     }
     private void OnEnable()
     {

@@ -33,6 +33,9 @@ public class TodoContent : MonoBehaviour
             TodoSaveManager.Instance?.Save(TodoManager.Instance?.GetCategories());
             //if (value) TodoManager.Instance.ClickTodo(value, todo);
         });
-        trashButton.onClick.AddListener(() => TodoManager.Instance.DeleteTodo(todo));
+        trashButton.onClick.AddListener(() =>
+        {
+            Warning.Instance.SetWarningScreen(true, () => TodoManager.Instance.DeleteTodo(todo));
+        });
     }
 }

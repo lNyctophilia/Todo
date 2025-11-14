@@ -21,6 +21,9 @@ public class TodoCategory : MonoBehaviour
 
         clickButton.onClick.AddListener(() => TodoManager.Instance.ClickCategory(category));
 
-        trashButton.onClick.AddListener(() => TodoManager.Instance.DeleteCategory(category));
+        trashButton.onClick.AddListener(() =>
+        {
+            Warning.Instance.SetWarningScreen(true, () => TodoManager.Instance.DeleteCategory(category));
+        });
     }
 }
